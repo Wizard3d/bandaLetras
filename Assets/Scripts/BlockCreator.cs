@@ -42,7 +42,15 @@ public class BlockCreator : MonoBehaviour {
 	void Start ()
 	{
 
+		rhythmTool = GetComponent<RhythmTool>();
 
+		//Give it a song.
+		rhythmTool.NewSong(audioClip[0]);
+
+		//Subscribe to SongLoaded event.
+		rhythmTool.SongLoaded += OnSongLoaded;
+
+		high = rhythmTool.high;
 
 		CreatPoolBlocks ();
 	}
@@ -87,7 +95,7 @@ public class BlockCreator : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
 	{		
-		/*currentFrame = rhythmTool.currentFrame;
+		currentFrame = rhythmTool.currentFrame;
 		if (currentBlock >= rhythmTool.totalFrames)
 			return;
 
@@ -98,7 +106,8 @@ public class BlockCreator : MonoBehaviour {
 		if (onSet > 0) {
 			Debug.Log (high.magnitude[currentFrame]);
 			SpawnBlock ();
-		}*/
+		}
+
 	}
 
 	private void CreatPoolBlocks()
