@@ -10,6 +10,10 @@ public class BasicController : MonoBehaviour
 
 	public AudioClip audioClip;
 
+	private int countBeat;
+
+	private int compas;
+
 	// Use this for initialization
 	void Start ()
 	{
@@ -31,11 +35,22 @@ public class BasicController : MonoBehaviour
 		rhythmTool.Play ();	
 	}
 
+	public void Yaju ()
+	{
+		countBeat++;
+		if (countBeat > 8) {
+			countBeat = 0;
+			compas++;
+			Debug.Log ("Jo"+compas);
+		}
+
+	}
 
 	// Update is called once per frame
 	void Update ()
 	{		
 		//Draw graphs representing the data.
 		rhythmTool.DrawDebugLines ();		
+
 	}
 }
