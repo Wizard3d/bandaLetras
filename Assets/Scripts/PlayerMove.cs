@@ -28,12 +28,18 @@ public class PlayerMove : MonoBehaviour {
 	// Update is called once per frame
 	void FixedUpdate () {
 
-		if (Input.GetKeyDown (KeyCode.Space) && isGrounded) 
+		/*if (Input.GetKeyDown (KeyCode.Space) && isGrounded) 
 		{
-			isGrounded = false;
-			rb.AddForce (Vector2.up * jumpForce, ForceMode2D.Impulse);
 
-		}
+		}*/
 		
+	}
+
+	public	void Jump(){
+		if(isGrounded)
+		{
+		isGrounded = false;
+		rb.AddForce (Vector2.up * jumpForce, ForceMode2D.Impulse);
+		}
 	}
 }
