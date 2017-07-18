@@ -7,10 +7,7 @@ public class BlockCreator : MonoBehaviour {
 
 	public RhythmTool rhythmTool;
 
-	public AudioClip[] audioClip;
-
-	[SerializeField]
-	private InputField myInputfield;
+	public AudioClip audioClip;
 
 	[SerializeField]
 	private Transform spawnTransform;
@@ -22,56 +19,59 @@ public class BlockCreator : MonoBehaviour {
 	private int beatsToSpawn;
 
 	[SerializeField]
-	private Dropdown myDropdown;
+	private AudioSource mainSample;
+
+	[SerializeField]
+	private int[] songCode; //codigo que define el orden de salida de las silabas
+
+	[SerializeField]
+	private string[] words; //aca se definen cuales silabas van a salir
+
+	private int currentWord; 
 
 	private GameObject[] poolBlocks = new GameObject[10];
 
 	private int countBeat;
 
-	private int compas;
-
 	private int currentBlock;
 
-	private AnalysisData high;
-
-
+	private AnalysisData lowFrec;
 
 	private int currentFrame;
+
+	private float lastFrec; // la ultima frecuencia que activo la creacion de bloques
 
 	// Use this for initialization
 	void Start ()
 	{
+		lowFrec = rhythmTool.low;
 
-
+		SetUpRhythmTool ();
 
 		CreatPoolBlocks ();
 	}
 
-	public void SetUpSong ()
-	{
-		int num = myDropdown.value;
 
-		beatsToSpawn = int.Parse( myInputfield.text);
-		//Get the RhythmTool Component.
-		rhythmTool = GetComponent<RhythmTool>();
-
-		//Give it a song.
-		rhythmTool.NewSong(audioClip[num]);
-
-		//Subscribe to SongLoaded event.
-		rhythmTool.SongLoaded += OnSongLoaded;
-
-		high = rhythmTool.high;
-
-
-	}
 
 	//OnReadyToPlay is called by RhythmTool after NewSong(), when RhythmTool is ready to start playing the song.
 	//When RhythmTool is ready depends on lead and on whether preCalculate is enabled.
 	private void OnSongLoaded()
 	{
 		//Start playing the song
-		rhythmTool.Play ();	
+		rhythmTool.Play();	
+		mainSample.PlayDelayed(3.5f);
+	}
+
+
+	// Update is called once per frame
+	void Update ()
+	{		
+		if (CheckInSongRange()) return;
+
+		if (CheckIsOnSet())
+			SpawnBlock ();
+		
+		lastFrec = lowFrec.magnitude [currentFrame];
 	}
 
 	public void CheckBeat ()
@@ -84,23 +84,6 @@ public class BlockCreator : MonoBehaviour {
 
 	}
 
-	// Update is called once per frame
-	void Update ()
-	{		
-		/*currentFrame = rhythmTool.currentFrame;
-		if (currentBlock >= rhythmTool.totalFrames)
-			return;
-
-		float onSet = high.GetOnset (currentFrame);
-
-	
-
-		if (onSet > 0) {
-			Debug.Log (high.magnitude[currentFrame]);
-			SpawnBlock ();
-		}*/
-	}
-
 	private void CreatPoolBlocks()
 	{
 		for(int i = 0; i <poolBlocks.Length; i++)
@@ -108,6 +91,34 @@ public class BlockCreator : MonoBehaviour {
 			poolBlocks[i] = Instantiate(blockPrefab);
 			poolBlocks[i].SetActive(false);
 		}
+	}
+
+	private bool CheckIsOnSet()
+	{
+		currentFrame = rhythmTool.currentFrame;
+
+		float onSet = lowFrec.GetOnset (currentFrame);
+
+
+		Debug.Log("Estoy aqui");
+		return (onSet > 0 && lastFrec != lowFrec.magnitude [currentFrame]);
+	}
+
+	private bool CheckInSongRange ()
+	{
+		return currentBlock >= rhythmTool.totalFrames;
+
+	}
+
+	void SetUpRhythmTool ()
+	{
+		rhythmTool = GetComponent<RhythmTool>();
+
+		//Give it a song.
+		rhythmTool.NewSong(audioClip);
+
+		//Subscribe to SongLoaded event.
+		rhythmTool.SongLoaded += OnSongLoaded;
 	}
 
 	void SpawnBlock ()
@@ -119,8 +130,8 @@ public class BlockCreator : MonoBehaviour {
 
 		poolBlocks [currentBlock].transform.position = spawnTransform.position;
 		poolBlocks [currentBlock].SetActive (true);
-		poolBlocks [currentBlock].GetComponent<Block> ().Speed = rhythmTool.bpm / 500;
+		poolBlocks [currentBlock].GetComponent<Block> ().SetText (words [songCode [currentWord]]);
 		currentBlock++;
-
+		currentWord++;
 	}
 }
